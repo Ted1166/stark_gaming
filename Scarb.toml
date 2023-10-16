@@ -9,5 +9,5 @@ starknet = ">=2.0.1"
 # foo = { path = "vendor/foo" }
 
 [[target.starknet-contract]]
+allowed-libfuncs-list.name = "experimental"
 sierra = true
-casm =true
