@@ -10,6 +10,9 @@ mod game{
     use starknet::ContractAddress;
     use starknet::get_caller_address;
     use debug::PrintTrait;
+    use starknet::get_block_timestamp;
+
+    const DEADLINE: u64 = 1234567890;
 
     #[storage]
     struct Storage {
@@ -34,22 +37,31 @@ mod game{
                     let id = self.guess_id.read()+1;
                     self.guess_id.write(id);
                     self.message.write(id, "Success");
-                } else if  num == guess {
+                    self.guess.write(0);
+                } else if  num > guess {
                     let id = self.guess_id.read();
-                    
+                    self.message.write(id, "Too low");    
+                } else if num < guess {
+                    let id = self.guess_id.read();
+                    self.message.write(id, "Too high");
                 }
             } 
         }
         
-        fn reset(ref self:ContractState) {}
+        fn reset(ref self:ContractState) {
+            self.guess.write(0);
+        }
 
-        fn get_message(ref self:ContractState, key:u128){}
+        fn get_message(ref self:ContractState, key:u128){
+            let message = self.message.read(key);
+            message.print();
+        }
     }
 
     #[generate_trait]
     impl numberImpl of numberTrait {
-        fn _random_number(ref self:ContractState)  {
-            
+        fn _random_number(ref self:ContractState, deadline:u64)  {
+            assert(get_block_timestamp() > deadline,"Redeeming before deadline");
         }
     }
     
